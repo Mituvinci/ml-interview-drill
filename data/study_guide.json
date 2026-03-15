@@ -1,0 +1,134 @@
+{
+  "title": "ML Interview Study Guide",
+  "subtitle": "MLE / Research Scientist interview preparation. Follow this order.",
+  "note": "Each phase builds on the previous. Don't skip ahead — interviewers probe foundations first. Agents and LLMs can be reviewed anytime since they require less math.",
+  "phases": [
+    {
+      "phase": 1,
+      "label": "Linear Algebra",
+      "color": "blue",
+      "why": "Every ML algorithm is linear algebra in disguise. This phase unlocks everything else.",
+      "priority": "CRITICAL",
+      "tags": ["linear_regression", "svd", "svd_pca", "eigendecomposition", "norms", "linear_algebra_basics", "matrix_multiplication"],
+      "drill_topics": ["Linear Regression (closed-form)", "SVD decomposition", "SVD & PCA connection", "Eigendecomposition", "Matrix norms", "Matrix multiply"],
+      "interview_tip": "For any matrix operation, be ready to: (1) write the equation, (2) explain dimensions, (3) give a numerical 2x2 example.",
+      "book_chapters": ["Goodfellow Ch. 2", "Géron Ch. 4 (Normal Equation)"],
+      "estimated_days": 3
+    },
+    {
+      "phase": 2,
+      "label": "Probability & Statistics",
+      "color": "green",
+      "why": "Loss functions, model selection, and uncertainty all come from probability. You need this before understanding why gradient descent converges.",
+      "priority": "CRITICAL",
+      "tags": ["bayes", "mle", "bias_variance", "cross_entropy", "evaluation"],
+      "drill_topics": ["Bayes theorem + Naive Bayes", "MLE for Gaussian", "Bias-variance decomposition", "Cross-entropy from MLE", "Precision / Recall / ROC-AUC"],
+      "interview_tip": "Bias-variance is asked in every ML interview. Derive it, give the formula, and give a concrete example (high bias = underfitting, high variance = overfitting).",
+      "book_chapters": ["Goodfellow Ch. 3", "Géron Ch. 2 (metrics)", "Chip Ch. 6 (evaluation)"],
+      "estimated_days": 2
+    },
+    {
+      "phase": 3,
+      "label": "Optimization",
+      "color": "orange",
+      "why": "Training = optimization. You cannot discuss any model without understanding gradient descent, Adam, and the pathologies (vanishing/exploding).",
+      "priority": "CRITICAL",
+      "tags": ["gradient_descent", "adam_optimizer", "vanishing_gradient", "exploding_gradient"],
+      "drill_topics": ["GD update rule", "Adam update rule (derive from scratch)", "Vanishing gradient — why it happens mathematically", "Exploding gradient + gradient clipping"],
+      "interview_tip": "Adam is almost always asked at top companies. Know: momentum term, RMS term, bias correction, and why it beats SGD on sparse gradients.",
+      "book_chapters": ["Goodfellow Ch. 8", "Géron Ch. 11"],
+      "estimated_days": 2
+    },
+    {
+      "phase": 4,
+      "label": "Regularization",
+      "color": "yellow",
+      "why": "Directly connected to overfitting. Comes up in every interview when they ask 'how would you improve this model?'",
+      "priority": "HIGH",
+      "tags": ["regularization", "dropout"],
+      "drill_topics": ["L1 vs L2 — equations and geometry", "Why L1 produces sparsity (gradient argument)", "Dropout at train vs inference", "Weight decay = L2"],
+      "interview_tip": "The geometric explanation of L1 sparsity (diamond vs circle constraint) is a favourite hard question. Draw it if you have a whiteboard.",
+      "book_chapters": ["Goodfellow Ch. 7", "Géron Ch. 4"],
+      "estimated_days": 1
+    },
+    {
+      "phase": 5,
+      "label": "Traditional ML Algorithms",
+      "color": "teal",
+      "why": "Breadth coverage. Interviewers at big tech still ask these. Also forms your mental model for comparing algorithms.",
+      "priority": "HIGH",
+      "tags": ["decision_trees", "random_forest", "ensemble", "adaboost", "gradient_boosting", "svm", "classification", "knn", "clustering", "pca", "dimensionality_reduction", "feature_engineering", "model_selection"],
+      "drill_topics": ["Decision tree splits (Gini vs entropy)", "Random forest — bagging intuition", "XGBoost — gradient boosting math", "SVM — margin maximisation + kernel trick", "Logistic regression + sigmoid derivation", "KNN — distance metrics + curse of dimensionality", "K-means + EM algorithm for GMM", "PCA from SVD", "t-SNE vs UMAP — when to use each", "Feature engineering — encoding, scaling, interaction terms", "Cross-validation — k-fold, stratified, time-series split"],
+      "interview_tip": "Don't memorise. For each algorithm: (1) when to use it, (2) key hyperparameter, (3) failure mode. That's what interviewers want.",
+      "book_chapters": ["Géron Ch. 3–9", "Chip Ch. 5 (feature engineering)"],
+      "estimated_days": 5
+    },
+    {
+      "phase": 6,
+      "label": "Deep Learning Core",
+      "color": "purple",
+      "why": "Non-negotiable for MLE/R&D roles. Backprop + attention are the two most-asked deep learning questions.",
+      "priority": "CRITICAL",
+      "tags": ["backprop", "batch_norm", "attention", "normalization", "cnn"],
+      "drill_topics": ["Backprop — chain rule, write update for one weight", "Batch normalisation — equations + why it helps", "Scaled dot-product attention — derive the equation", "Why scale by sqrt(d_k)?", "CNN — convolution, pooling, receptive field", "ResNets — skip connections and why they help"],
+      "interview_tip": "For attention: write Q, K, V — softmax(QK^T / sqrt(d_k)) V. Interviewers will ask what happens without the sqrt(d_k) scaling. Answer: dot products grow large, softmax saturates, gradients vanish.",
+      "book_chapters": ["Goodfellow Ch. 6, 9", "Géron Ch. 14–16"],
+      "estimated_days": 4
+    },
+    {
+      "phase": 7,
+      "label": "Deep Architectures",
+      "color": "purple",
+      "why": "For R&D roles, you need depth beyond transformers. VAEs, LSTMs, and transfer learning come up frequently.",
+      "priority": "MEDIUM",
+      "tags": ["lstm", "vae", "autoencoders", "transfer_learning", "few_shot", "explainability"],
+      "drill_topics": ["LSTM gates — forget, input, output (write equations)", "GRU vs LSTM — simplification", "VAE — reparameterisation trick, ELBO loss", "Transfer learning — fine-tuning vs feature extraction", "MAML — meta-learning objective", "SHAP values — game theory interpretation", "Grad-CAM — gradient-weighted class activation"],
+      "interview_tip": "VAE reparameterisation trick is a top R&D interview question: z = mu + eps * sigma where eps ~ N(0,1). Explain why we can't backprop through sampling directly.",
+      "book_chapters": ["Goodfellow Ch. 10 (RNNs)", "Géron Ch. 15, 17"],
+      "estimated_days": 3
+    },
+    {
+      "phase": 8,
+      "label": "ML Systems Design",
+      "color": "red",
+      "why": "Chip Huyen's book covers the production side. System design rounds are standard at FAANG. Data leakage has failed many senior candidates.",
+      "priority": "HIGH",
+      "tags": ["data_leakage", "class_imbalance", "concept_drift", "time_series", "health_ai", "bioinformatics"],
+      "drill_topics": ["Data leakage — 3 real examples", "Class imbalance — SMOTE, class weights, threshold moving", "Concept drift — detection (PSI, KS test) and remediation", "Time series — correct train/val split (no future leakage)", "Health AI — regulatory constraints, label noise"],
+      "interview_tip": "System design: always start with 'what is the business metric?' then work backwards to the ML metric. Interviewers penalise candidates who jump to modelling without questioning the problem framing.",
+      "book_chapters": ["Chip Huyen DMLS Ch. 4–9"],
+      "estimated_days": 3
+    },
+    {
+      "phase": 9,
+      "label": "LLM & Agents",
+      "color": "indigo",
+      "why": "Hot area — almost guaranteed questions at any company doing AI products. Less foundational math, more architectural understanding. Can revisit anytime.",
+      "priority": "MEDIUM",
+      "tags": ["llm_fundamentals", "tokenization", "llm_finetuning", "rag", "agent_architecture", "tool_use", "agent_memory", "multi_agent", "prompt_engineering", "in_context_learning", "llm_reasoning", "foundation_models"],
+      "drill_topics": ["Transformer architecture end-to-end", "BPE tokenisation", "LoRA — low-rank decomposition, which matrices?", "RLHF pipeline — SFT → reward model → PPO", "DPO vs RLHF — why DPO skips the reward model", "RAG — retrieval strategies, chunking, re-ranking", "Agent memory types — semantic, episodic, procedural", "Scaling laws — Chinchilla optimal compute"],
+      "interview_tip": "For LLM questions: always mention trade-offs. LoRA is cheaper but may underperform full fine-tuning for large distribution shifts. RAG is cheap but retrieval quality is the bottleneck.",
+      "book_chapters": ["Ed Donner Agentic AI slides", "Chip Huyen AI Engineering (if available)"],
+      "estimated_days": 4
+    },
+    {
+      "phase": 10,
+      "label": "Framework Studio",
+      "color": "teal",
+      "why": "Practical coding fluency. Shows interviewers you can ship, not just theorise. Do this alongside Phase 9 or after.",
+      "priority": "PRACTICAL",
+      "tags": [],
+      "drill_topics": ["OpenAI Agents SDK — Agent + Runner.run() pattern", "CrewAI — @CrewBase, YAML configs, custom tools", "LangGraph — StateGraph, nodes/edges, MemorySaver checkpointing"],
+      "interview_tip": "For coding rounds: narrate your choices. 'I'm using LangGraph here because the workflow has conditional branching and I need persistent state across turns.' That's the answer they want.",
+      "book_chapters": ["Framework Studio module"],
+      "estimated_days": 3
+    }
+  ],
+  "quick_reference": {
+    "total_estimated_days": 30,
+    "if_you_have_1_week": "Phases 1, 3, 6 only — linear algebra, optimization, deep learning core. These are the most common interview blockers.",
+    "if_you_have_2_weeks": "Phases 1–6 — adds statistics, regularisation, and traditional ML breadth.",
+    "if_you_have_1_month": "All phases in order.",
+    "daily_routine": "30 min drill (Core Drill or Book Exercises) + 15 min cheat sheet review. Weak spots auto-surface — trust the system."
+  }
+}

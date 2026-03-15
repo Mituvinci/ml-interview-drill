@@ -1,0 +1,17 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+data/books/
+data/chroma_db/
+data/progress.json
+data/journal.json
+data/answer_cache.json
+data/book_exercises.json
+data/generated_questions.json
+data/code_explanations.json
+notes/*.html
+*.egg-info/
+dist/
+.uv/
+uv.lock

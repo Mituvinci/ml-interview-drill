@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ML Drill</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    html { font-size: 20px; }
+    body { background: #f8fafc; color: #1e293b; font-family: 'Courier New', monospace; }
+    .score-ring { font-size: 3rem; font-weight: bold; }
+    textarea { resize: vertical; }
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #e2e8f0; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+    .prose p { margin-bottom: 0.5em; }
+    .prose ul { list-style: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
+    .prose ol { list-style: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
+    .prose code { background: #f1f5f9; padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.875em; }
+    .prose pre { background: #f1f5f9; padding: 0.75em; border-radius: 4px; overflow-x: auto; margin-bottom: 0.5em; }
+    .prose strong { font-weight: 700; }
+    .prose em { font-style: italic; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Shared utils + HomeScreen (referenced by all components) -->
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+function Markdown({ content }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current && content) {
+      ref.current.innerHTML = marked.parse(content);
+      if (window.MathJax) MathJax.typesetPromise([ref.current]).catch(() => {});
+    }
+  }, [content]);
+  return <div ref={ref} className="prose prose-sm max-w-none" />;
+}
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || "Request failed");
+  }
+  return res.json();
+}
+
+function Badge({ label, color = "gray" }) {
+  const colors = { gray: "bg-gray-100 text-gray-700", green: "bg-green-100 text-green-700",
+    red: "bg-red-100 text-red-700", yellow: "bg-yellow-100 text-yellow-700",
+    blue: "bg-blue-100 text-blue-700" };
+  return <span className={`text-xs px-2 py-0.5 rounded ${colors[color]}`}>{label}</span>;
+}
+
+function Btn({ onClick, children, variant = "primary", disabled = false, className = "" }) {
+  const base = "px-4 py-2 rounded font-semibold transition-colors focus:outline-none ";
+  const variants = {
+    primary: "bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40",
+    secondary: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 disabled:opacity-40",
+    danger: "bg-red-700 hover:bg-red-600 text-white disabled:opacity-40",
+    purple: "bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-40",
+  };
+  return <button onClick={onClick} disabled={disabled} className={base + variants[variant] + " " + className}>{children}</button>;
+}
+
+function Card({ children, className = "" }) {
+  return <div className={`bg-white border border-gray-200 rounded-lg p-5 ${className}`}>{children}</div>;
+}
+
+function HomeScreen({ onStart, onProgress, onWeakSpots, onJournal, onBookEx, onCheatSheet, onFramework, onStudyGuide }) {
+  const [showFramework, setShowFramework] = React.useState(
+    () => localStorage.getItem("ml_drill_framework_mode") === "on"
+  );
+  const [showSettings, setShowSettings] = React.useState(false);
+
+  const toggleFramework = () => {
+    const next = !showFramework;
+    setShowFramework(next);
+    localStorage.setItem("ml_drill_framework_mode", next ? "on" : "off");
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-8 fade-in">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-indigo-600 mb-2">ML Drill</h1>
+        <p className="text-gray-500">Socratic ML interview prep · Claude evaluation</p>
+      </div>
+      <div className="flex flex-col gap-3 w-64">
+        <Btn onClick={onStart} className="w-full text-lg py-3">Core Drill</Btn>
+        <Btn onClick={onBookEx} variant="secondary" className="w-full text-lg py-3">Book Exercises</Btn>
+        <Btn onClick={onProgress} variant="secondary" className="w-full">View Progress</Btn>
+        <Btn onClick={onWeakSpots} variant="secondary" className="w-full">Weak Spots</Btn>
+        <Btn onClick={onJournal} variant="secondary" className="w-full">Study Journal</Btn>
+        <Btn onClick={onCheatSheet} variant="purple" className="w-full">Equation Cheat Sheet</Btn>
+        <Btn onClick={onStudyGuide} variant="secondary" className="w-full border-indigo-300 text-indigo-600 hover:bg-indigo-50">Study Guide</Btn>
+        {showFramework && (
+          <Btn onClick={onFramework} className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+            Framework Studio
+          </Btn>
+        )}
+      </div>
+      <button
+        onClick={() => setShowSettings(s => !s)}
+        className="text-gray-400 hover:text-gray-600 text-xs flex items-center gap-1 mt-2"
+        title="Settings"
+      >
+        ⚙ Settings
+      </button>
+      {showSettings && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm w-64 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-700 font-medium">Framework Studio</span>
+            <button
+              onClick={toggleFramework}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+                showFramework ? "bg-teal-100 text-teal-700" : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {showFramework ? "ON" : "OFF"}
+            </button>
+          </div>
+          <p className="text-gray-400 text-xs mt-1">Hide when recording or sharing</p>
+        </div>
+      )}
+    </div>
+  );
+}
+</script>
+
+<!-- Components -->
+<script type="text/babel" src="/frontend/components/DrillScreens.js"></script>
+<script type="text/babel" src="/frontend/components/ProgressScreens.js"></script>
+<script type="text/babel" src="/frontend/components/JournalScreens.js"></script>
+<script type="text/babel" src="/frontend/components/BookExScreens.js"></script>
+<script type="text/babel" src="/frontend/components/DrillMenuScreen.js"></script>
+<script type="text/babel" src="/frontend/components/CheatSheetScreen.js"></script>
+<script type="text/babel" src="/frontend/components/FrameworkLearnScreen.js"></script>
+<script type="text/babel" src="/frontend/components/StudyGuideScreen.js"></script>
+
+<!-- App -->
+<script type="text/babel">
+function App() {
+  const [screen, setScreen] = useState("home");
+  const [feedbackData, setFeedbackData] = useState(null);
+  const [followUpData, setFollowUpData] = useState(null);
+  const [journalCacheKey, setJournalCacheKey] = useState(null);
+  const [drillTag, setDrillTag] = useState(null);
+  const [drillStartId, setDrillStartId] = useState(null);
+
+  const [exBook, setExBook] = useState(null);
+  const [exChapterNum, setExChapterNum] = useState(null);
+  const [exStartQ, setExStartQ] = useState(0);
+  const [exFeedback, setExFeedback] = useState(null);
+
+  const handleFeedback = (data) => { setFeedbackData(data); setScreen("feedback"); };
+  const handleFollowUp = (text) => {
+    setFollowUpData({ question: feedbackData.question, followUpText: text });
+    setScreen("followup");
+  };
+  const handleNextQuestion = () => { setFeedbackData(null); setDrillTag(null); setDrillStartId(null); setScreen("drill"); };
+  const handleDrillQuestion = (id) => { setDrillStartId(id); setDrillTag(null); setScreen("drill"); };
+  const handleForceRefresh = async (cacheKey) => {
+    if (!feedbackData) return;
+    const result = await apiFetch("/api/evaluate", {
+      method: "POST",
+      body: JSON.stringify({ question_id: feedbackData.question.question_id, answer: feedbackData.answer, force_refresh: true }),
+    });
+    setFeedbackData(d => ({ ...d, result }));
+  };
+  const handleViewJournalEntry = (cacheKey) => { setJournalCacheKey(cacheKey); setScreen("journalentry"); };
+
+  const handleExDrill = (book, chapterNum) => {
+    setExBook(book); setExChapterNum(chapterNum); setExStartQ(0); setScreen("exdrill");
+  };
+  const handleExFeedback = (data) => { setExFeedback(data); setScreen("exfeedback"); };
+  const handleExNext = () => {
+    const nextIdx = (exFeedback?.qIndex ?? 0) + 1;
+    setExStartQ(nextIdx); setExFeedback(null); setScreen("exdrill");
+  };
+  const handleExForceRefresh = async (cacheKey) => {
+    if (!exFeedback) return;
+    const result = await apiFetch("/api/exercises/evaluate", {
+      method: "POST",
+      body: JSON.stringify({
+        book: exFeedback.book.key, chapter: exFeedback.chapterNum,
+        q_index: exFeedback.qIndex, answer: exFeedback.answer, force_refresh: true,
+      }),
+    });
+    setExFeedback(d => ({ ...d, result }));
+  };
+
+  return (
+    <div>
+      {screen === "home" && (
+        <HomeScreen
+          onStart={() => setScreen("drillmenu")}
+          onProgress={() => setScreen("progress")}
+          onWeakSpots={() => setScreen("weakspots")}
+          onJournal={() => setScreen("journal")}
+          onBookEx={() => setScreen("bookex")}
+          onCheatSheet={() => setScreen("cheatsheet")}
+          onFramework={() => setScreen("framework")}
+          onStudyGuide={() => setScreen("studyguide")}
+        />
+      )}
+      {screen === "drillmenu" && (
+        <DrillMenuScreen
+          onBack={() => setScreen("home")}
+          onRandom={() => { setDrillTag(null); setScreen("drill"); }}
+          onDrillTag={(tag) => { setDrillTag(tag); setScreen("drill"); }}
+        />
+      )}
+      {screen === "cheatsheet" && (
+        <CheatSheetScreen
+          onBack={() => setScreen("home")}
+          onDrillTag={(tag) => { setDrillTag(tag); setScreen("drill"); }}
+        />
+      )}
+      {screen === "bookex" && (
+        <BookExScreen onBack={() => setScreen("home")} onDrill={handleExDrill} />
+      )}
+      {screen === "exdrill" && exBook && (
+        <ExerciseDrillScreen
+          key={`${exBook.key}-${exChapterNum}-${exStartQ}`}
+          book={exBook} chapterNum={exChapterNum} startQIndex={exStartQ}
+          onBack={() => setScreen("bookex")} onFeedback={handleExFeedback}
+        />
+      )}
+      {screen === "exfeedback" && exFeedback && (
+        <ExerciseFeedbackScreen
+          data={exFeedback} onNext={handleExNext}
+          onBack={() => setScreen("bookex")} onForceRefresh={handleExForceRefresh}
+        />
+      )}
+      {screen === "drill" && (
+        <DrillScreen onBack={() => { setDrillTag(null); setDrillStartId(null); setScreen("home"); }} onFeedback={handleFeedback} filterTag={drillTag} startQuestionId={drillStartId} />
+      )}
+      {screen === "feedback" && feedbackData && (
+        <FeedbackScreen
+          data={feedbackData} onNext={handleNextQuestion}
+          onFollowUp={handleFollowUp} onForceRefresh={handleForceRefresh}
+          onBack={() => setScreen("home")}
+        />
+      )}
+      {screen === "followup" && followUpData && (
+        <FollowUpScreen
+          originalQuestion={followUpData.question}
+          followUpText={followUpData.followUpText}
+          onBack={() => setScreen("feedback")} onDone={handleNextQuestion}
+        />
+      )}
+      {screen === "progress" && <ProgressScreen onBack={() => setScreen("home")} />}
+      {screen === "weakspots" && (
+        <WeakSpotsScreen
+          onBack={() => setScreen("home")}
+          onDrill={() => setScreen("drill")}
+          onDrillTag={(tag) => { setDrillTag(tag); setScreen("drill"); }}
+        />
+      )}
+      {screen === "journal" && (
+        <JournalScreen onBack={() => setScreen("home")} onViewEntry={handleViewJournalEntry} />
+      )}
+      {screen === "framework" && (
+        <FrameworkLearnScreen onBack={() => setScreen("home")} />
+      )}
+      {screen === "journalentry" && journalCacheKey && (
+        <JournalEntryScreen cacheKey={journalCacheKey} onBack={() => setScreen("journal")} />
+      )}
+      {screen === "studyguide" && (
+        <StudyGuideScreen
+          onBack={() => setScreen("home")}
+          onDrillTag={(tag) => { setDrillTag(tag); setDrillStartId(null); setScreen("drill"); }}
+          onDrillQuestion={handleDrillQuestion}
+        />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
