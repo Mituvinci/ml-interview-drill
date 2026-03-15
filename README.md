@@ -10,13 +10,11 @@ A personal ML interview preparation tool powered by Claude AI and RAG over your 
 
 ## Screenshots
 
-| Home | Book Exercises | Progress |
-|------|---------------|---------|
-| ![Home](images/sc_1.jpg) | ![Book Exercises](images/sc_2.png) | ![Progress](images/sc3.png) |
+![Home](images/sc_1.jpg)
 
-| Study Journal |
-|--------------|
-| ![Study Journal](images/sc_4.png) |
+| Book Exercises | Progress | Study Journal |
+|---------------|---------|--------------|
+| ![Book Exercises](images/sc_2.png) | ![Progress](images/sc3.png) | ![Study Journal](images/sc_4.png) |
 
 ---
 
