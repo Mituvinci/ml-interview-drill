@@ -44,8 +44,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### 2. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ml-drill.git
-cd ml-drill
+git clone https://github.com/Mituvinci/ml-interview-drill.git
+cd ml-interview-drill
 uv sync
 ```
 
